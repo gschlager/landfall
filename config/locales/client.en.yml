@@ -1,0 +1,8 @@
+en:
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          landfall: "Landfall"
+  js:
+    landfall: {}

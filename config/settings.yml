@@ -1,0 +1,8 @@
+landfall:
+  landfall_enabled:
+    default: false
+    client: true
+  landfall_login_with_old_password_enabled:
+    default: true
+  landfall_login_with_old_username_enabled:
+    default: true

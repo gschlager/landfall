@@ -1,0 +1,5 @@
+en:
+  site_settings:
+    landfall_enabled: "Enable Landfall, the migration-companion plugin."
+    landfall_login_with_old_password_enabled: "Allow members to log in with the password they used on the forum that was migrated into Discourse. The legacy hash is re-hashed to Discourse's native algorithm and discarded on first use."
+    landfall_login_with_old_username_enabled: "Allow members who were renamed during the import to log in with their old username."
