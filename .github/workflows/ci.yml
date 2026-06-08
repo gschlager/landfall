@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pure-logic:
+    name: "Tier 1: pure logic (RSpec + 100% mutation)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: RSpec (Tier 1, no Discourse)
+        run: bundle exec rspec spec/lib/landfall
+
+      - name: Mutation testing (mutant, 100% gate)
+        run: bundle exec bin/mutant run
