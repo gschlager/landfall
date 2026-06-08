@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Bundler does not expose mutant's executable as a binstub, so load its real
+# entrypoint directly. Run as: bundle exec bin/mutant run
+load Gem.bin_path("mutant", "mutant-ruby")

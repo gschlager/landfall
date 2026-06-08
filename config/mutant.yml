@@ -1,0 +1,24 @@
+---
+usage: opensource
+integration:
+  name: rspec
+includes:
+  - lib
+  - spec
+requires:
+  - landfall/legacy_password_verifier
+  - landfall/login_decision
+coverage_criteria:
+  timeout: true
+  process_abort: true
+matcher:
+  subjects:
+    - "Landfall::Hashers*"
+    - "Landfall::LegacyPasswordVerifier*"
+    - "Landfall::LoginDecision*"
+  ignore:
+    # phpass's bit-level encoder has irreducible mutants (the round upper bound
+    # would need a 2**30-iteration fixture; the base64 boundary is an equivalent
+    # mutant for fixed 16-byte MD5 input). It is instead cross-validated against
+    # passlib's authoritative vectors in the verifier spec.
+    - "Landfall::Hashers::Phpass*"

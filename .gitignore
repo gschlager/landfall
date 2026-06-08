@@ -1,0 +1,10 @@
+/gems/
+/.bundle/
+/vendor/bundle/
+/coverage/
+/tmp/
+/.mutant/
+*.gem
+.rspec_status
+.byebug_history
+node_modules/
