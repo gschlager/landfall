@@ -8,6 +8,10 @@
 # url: https://github.com/gschlager/discourse-migrations
 # required_version: 2.7.0
 
+# Discourse uses pbkdf2 natively and no longer ships bcrypt, so the plugin declares
+# it for verifying legacy bcrypt password hashes during a migration.
+gem "bcrypt", "3.1.22"
+
 enabled_site_setting :landfall_enabled
 
 module ::Landfall

@@ -13,3 +13,9 @@ group :test do
   gem "mutant", require: false
   gem "mutant-rspec", require: false
 end
+
+# Linting — also used by Discourse's reusable plugin CI (`bundle exec rubocop`/`stree`).
+group :development, :test do
+  gem "rubocop-discourse", require: false
+  gem "syntax_tree", require: false
+end
