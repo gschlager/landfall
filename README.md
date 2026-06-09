@@ -1,80 +1,89 @@
-# Landfall
+# 🌊 Landfall
 
-A migration-companion plugin for [Discourse](https://www.discourse.org). Landfall
-smooths the cutover when you import one or more communities into Discourse — and helps
-members feel at home once they arrive. The login features below are the first step; see
-[`IDEAS.md`](IDEAS.md) for the broader roadmap.
+> *Your community just sailed to a new home. Landfall makes sure everyone gets ashore.*
 
-## At a glance
+**Landfall** is a migration-companion plugin for [Discourse](https://www.discourse.org).
+It smooths the cutover when you import one or more communities into Discourse — and helps
+members feel at home the moment they arrive. The login features below are just the *first
+step*; the [roadmap](IDEAS.md) goes a lot further.
 
-- **Log in with the old password** — members sign in with the password from their old
-  forum. Landfall verifies it against a stored legacy hash (11 formats supported), then
-  re-hashes it to Discourse's native algorithm and deletes the legacy hash — so the
-  legacy hash is used exactly once.
-- **Automatic set-password email** — members who arrive with no usable password get a
-  set-password link and a clear message the first time they try to sign in, instead of
-  a bare "incorrect password".
-- **Log in with the old username** — members renamed during import can sign in with
-  their previous username. Live-username collisions are resolved by password and never
-  guessed, so an existing account can't be hijacked.
+Sibling to the MIT [`discourse/markbridge`](https://github.com/discourse/markbridge)
+markup-conversion gem, and held to the same strict quality bar — see [`TESTING.md`](TESTING.md).
 
-It is a sibling to the MIT [`discourse/markbridge`](https://github.com/discourse/markbridge)
-markup-conversion gem. See [`TESTING.md`](TESTING.md) for the quality standard.
+## ✨ What you get
 
-## Features (v1)
+- 🔑 **Log in with the old password** — members sign in with the password from their
+  *old* forum. Landfall checks it against the stored legacy hash, and on a match *quietly*
+  re-hashes it to Discourse's native algorithm and **shreds the legacy hash**. Used exactly
+  once, then gone. *11 hash formats supported.*
+- 📧 **Automatic set-password email** — no usable password to import? Instead of a cryptic
+  *"incorrect password"*, the member gets a friendly set-password link the first time they
+  try to sign in. No day-one mass reset, no flood of confused support emails.
+- 👤 **Log in with the old username** — renamed by Discourse's de-duplication during the
+  import? Members can still sign in under their *old* name. Collisions are settled by
+  password — **never guessed** — so nobody's account gets hijacked.
 
-### Log in with the old password
+---
 
-Imported users usually arrive with **no Discourse password**, forcing everyone through
-a reset on day one. Landfall lets members log in with the password they used on the old
-forum: when Discourse's native check fails, it verifies the entered password against a
-stored legacy hash. On a match it **re-hashes the password to Discourse's native
-algorithm and deletes the legacy hash** — so the legacy hash is used exactly once.
+## 🔍 How it works
 
-Supported legacy formats: `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`, `vbulletin`,
-`ipb`, `smf`, `joomla`, `crypt`, and `phpass` (WordPress / phpBB3).
+### 🔑 Log in with the old password
 
-A matched legacy password is only migrated if it **satisfies Discourse's current
-password policy** (length, blocked passwords, …). A correct-but-non-compliant password
-is never stored; instead the member is routed into the reset flow below.
+Imported users almost always land with **no Discourse password** — which means a day-one
+reset for *everyone*. Ugh.
 
-### Set a new password when there's no usable one
+Landfall fixes that. When Discourse's native check comes up empty, it verifies the typed
+password against the stored legacy hash. Match? It re-hashes to Discourse's native
+algorithm and **deletes the legacy hash on the spot** — touched exactly once, then never
+again.
 
-Some imported members can't keep their old password — either it couldn't be imported,
-or it no longer meets the password policy. Without help they don't know they need to do
-anything. When such a member tries to sign in, Landfall emails them a set-password link
-and shows a clear message, instead of a bare "incorrect password". This reuses
-Discourse's own reset-email flow (and the "set password" template for passwordless
-accounts), and stops automatically once they've set a password.
+It speaks the dialects of `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`, `vbulletin`, `ipb`,
+`smf`, `joomla`, `crypt`, and `phpass` (WordPress / phpBB3).
 
-### Log in with the old username
+One guardrail: a matched password is only kept if it **clears Discourse's current password
+policy** (length, blocklist, and friends). Correct but non-compliant? It's *never* stored —
+the member is handed straight to the reset flow below.
 
-Discourse's username rules and de-duplication often **rename** members during import.
-Landfall lets a renamed member log in with their previous username. It resolves the
-typed name to the user's current username before the normal login runs, so rate
-limiting, 2FA, and session handling are all reused unchanged.
+### 📧 Set a new password when there's no usable one
 
-It also handles the **live-username collision** case: if the imported community had a
-`Foo` that was renamed to `Foo2` because the destination already had a different `Foo`,
-typing `Foo` logs in the live `Foo` when their password matches, and the imported
-`Foo2` when *their* old password matches. If the name is ambiguous, login is refused
-rather than guessed — the live owner can never be hijacked.
+Some members simply can't keep their old password — it didn't survive the import, or it no
+longer meets the policy. The catch: they have *no idea* anything's wrong.
 
-## Settings
+So when they try to sign in, Landfall emails them a set-password link and shows a clear,
+human message — not a blunt *"incorrect password"*. It rides on Discourse's own reset-email
+flow (and the *"set password"* template for passwordless accounts), and bows out the moment
+they've set one.
 
-| Setting | Default | Description |
+### 👤 Log in with the old username
+
+Discourse's username rules and de-duplication love to **rename** people during an import.
+Landfall lets a renamed member sign in under their *old* name: it swaps the typed name for
+their current username *before* the normal login runs, so rate limiting, 2FA, and sessions
+keep working exactly as they always do.
+
+The interesting bit is **collisions**. Say the imported community had a `Foo`, but the
+destination already had a *different* `Foo` — so the newcomer became `Foo2`. Type `Foo`, and:
+
+- the **live `Foo`** logs in if *their* password matches, and
+- the **imported `Foo2`** logs in if *their* old password matches.
+
+Ambiguous? Login is **refused, not guessed**. The original `Foo` can never be hijacked.
+
+## ⚙️ Settings
+
+| Setting | Default | What it does |
 | --- | --- | --- |
-| `landfall_enabled` | `false` | Master switch. |
+| `landfall_enabled` | `false` | **Master switch.** |
 | `landfall_login_with_old_password_enabled` | `true` | Enable old-password login. |
 | `landfall_login_with_old_username_enabled` | `true` | Enable old-username login. |
 | `landfall_force_password_reset_enabled` | `true` | Email a set-password link to imported members with no usable password when they try to sign in. |
 
-## Import-tooling data contract
+## 🔌 Import-tooling data contract
 
-Landfall stores its data in **plugin-owned tables** (never user custom fields), so a
-legacy hash can never leak through a serializer. Your migration tooling populates them:
+Landfall keeps its data in **plugin-owned tables** — never user custom fields — so a legacy
+hash can't *ever* slip out through a serializer. Your migration tooling fills them in.
 
-`migrated_passwords` (one row per user):
+**`migrated_passwords`** — one row per user:
 
 | Column | Notes |
 | --- | --- |
@@ -83,36 +92,35 @@ legacy hash can never leak through a serializer. Your migration tooling populate
 | `password_hash` | the stored legacy hash (omit for a reset-required marker) |
 | `salt` | for `vbulletin` / `ipb` (others embed their salt) |
 | `metadata` | JSON; e.g. `{ "username": "..." }` for `smf` |
-| `reset_required` | `true` for members with no importable password — they are routed to set one on login |
+| `reset_required` | `true` for members with no importable password — routed to set one on login |
 
-Because the algorithm is stored **per user**, you can merge communities coming from
-different forum software into one Discourse site. For a member whose password you
-couldn't bring over, write a row with just `reset_required: true` (no algorithm/hash).
+Because the algorithm lives **per user**, you can blend communities from completely
+different forum software into a single Discourse site. Couldn't rescue someone's password?
+Write a row with just `reset_required: true` — no algorithm, no hash.
 
-`migrated_usernames` (one row per prior username per user): `user_id`, `username`
+**`migrated_usernames`** — one row per prior username per user: `user_id`, `username`
 (`username_lower` is derived and indexed for fast, exact lookups).
 
-## Security notes
+## 🔒 Security notes
 
-- Legacy hashes live only in `migrated_passwords` and are never serialized to
-  any client.
-- A live username owner is always authenticated first, so old-username login can never
-  take over an existing account; ambiguous old usernames are refused.
-- Both paths run behind Discourse's existing login rate limiter.
-- Legacy hashes are deleted on first successful use. Purging stale credentials after a
-  grace period is on the roadmap.
+- Legacy hashes live **only** in `migrated_passwords` and are *never* serialized to a client.
+- The live username owner is **always** authenticated first — old-username login can't take
+  over an existing account, and ambiguous names are refused.
+- Both paths sit behind Discourse's existing login **rate limiter**.
+- Legacy hashes are **deleted on first successful use**. Bulk-purging stale credentials after
+  a grace period is on the roadmap.
 
-## Development
+## 🛠️ Development
 
 ```bash
 bundle install
-rspec spec/lib/landfall      # fast, pure-logic suite (no Discourse)
-bundle exec bin/mutant run   # mutation testing gate (100%)
+rspec spec/lib/landfall      # fast, pure-logic suite (no Discourse needed)
+bundle exec bin/mutant run   # mutation-testing gate — 100%, no excuses
 ```
 
-The Discourse-integration specs (`spec/integration`) run inside a Discourse checkout.
-See [`TESTING.md`](TESTING.md).
+The integration specs (`spec/integration`) run inside a Discourse checkout — details in
+[`TESTING.md`](TESTING.md).
 
-## License
+## 📄 License
 
-MIT — see [`LICENSE`](LICENSE).
+**MIT** — see [`LICENSE`](LICENSE). Use it, fork it, ship it.
