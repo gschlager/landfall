@@ -147,6 +147,55 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
     end
   end
 
+  describe "phpass scheme specifics" do
+    it "verifies a password containing non-ASCII characters" do
+      # Vector generated independently from the openwall phpass algorithm ($P$, count_log2 13).
+      expect(
+        verify(
+          "naïve-café-пароль🔒",
+          algorithm: "phpass",
+          hash: "$P$BabcdefghTfVjVcgthsYljMm./n9mv0",
+          salt: nil,
+          metadata: nil,
+        ),
+      ).to eq(true)
+    end
+
+    it "returns false (does not raise) for a truncated hash" do
+      expect(verify("password", algorithm: "phpass", hash: "$P$", salt: nil, metadata: nil)).to eq(
+        false,
+      )
+    end
+
+    it "does not verify a bcrypt-mode ($2a$) hash through the phpass scheme" do
+      # phpass can emit bcrypt hashes, but those are handled by the bcrypt hasher, not here.
+      expect(
+        verify(
+          "password",
+          algorithm: "phpass",
+          hash: "$2a$04$fPpywJpN.uHjS3vEAQYmv.PgvM8ZoDMq8e11YCVTb1za/Iqs8cuXC",
+          salt: nil,
+          metadata: nil,
+        ),
+      ).to eq(false)
+    end
+  end
+
+  describe "bcrypt version tags" do
+    # phpBB 3.0 stored phpass ($H$); phpBB 3.1+ defaults to bcrypt $2y$ (and accepts
+    # $2a$). For an ASCII password the digest body is identical across version tags,
+    # so the canonical $2a$ fixture is retagged to cover each one.
+    bcrypt_2a = "$2a$04$fPpywJpN.uHjS3vEAQYmv.PgvM8ZoDMq8e11YCVTb1za/Iqs8cuXC"
+    %w[$2a$ $2b$ $2x$ $2y$].each do |tag|
+      it "accepts a #{tag} hash" do
+        hash = bcrypt_2a.sub(/\A\$2[abxy]\$/, tag)
+        expect(verify(password, algorithm: "bcrypt", hash: hash, salt: nil, metadata: nil)).to eq(
+          true,
+        )
+      end
+    end
+  end
+
   describe "dispatcher guards" do
     it "returns false for an unknown algorithm" do
       expect(verify(password, algorithm: "rot13", hash: "x", salt: nil, metadata: nil)).to eq(false)
