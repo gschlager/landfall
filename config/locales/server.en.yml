@@ -1,5 +1,8 @@
 en:
+  landfall:
+    must_reset_password: "For security reasons you need to set a new password before you can sign in. We've emailed you a link to set one."
   site_settings:
     landfall_enabled: "Enable Landfall, the migration-companion plugin."
     landfall_login_with_old_password_enabled: "Allow members to log in with the password they used on the forum that was migrated into Discourse. The legacy hash is re-hashed to Discourse's native algorithm and discarded on first use."
     landfall_login_with_old_username_enabled: "Allow members who were renamed during the import to log in with their old username."
+    landfall_force_password_reset_enabled: "When an imported member has no usable password (their old password could not be imported, or it no longer meets the password policy), email them a link to set a new one when they try to sign in."

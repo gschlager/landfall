@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 
 module Landfall
-  # A legacy password hash imported from another forum, stored server-side only.
-  # Created by the migration tooling; deleted automatically the first time the user
-  # logs in with it (after re-hashing to Discourse's native algorithm).
+  # What the migration knows about an imported user's password, stored server-side
+  # only. Two shapes:
+  #   * a legacy hash (algorithm + password_hash [+ salt/metadata]) the user can log in
+  #     with once, after which it is re-hashed natively and the row is deleted; or
+  #   * a "reset required" marker (reset_required: true, no hash) for users whose
+  #     password could not be imported — they are routed to set a new password on login.
   class MigratedPassword < ActiveRecord::Base
     self.table_name = "migrated_passwords"
 
     belongs_to :user
 
     validates :user_id, presence: true, uniqueness: true
-    validates :algorithm, presence: true
-    validates :password_hash, presence: true
+    validates :algorithm, presence: true, unless: :reset_required?
+    validates :password_hash, presence: true, unless: :reset_required?
   end
 end
 
@@ -19,13 +22,14 @@ end
 #
 # Table name: migrated_passwords
 #
-#  id            :bigint           not null, primary key
-#  user_id       :bigint           not null
-#  algorithm     :string           not null
-#  password_hash :string           not null
-#  salt          :string
-#  metadata      :jsonb
-#  created_at    :datetime         not null
+#  id             :bigint           not null, primary key
+#  user_id        :bigint           not null
+#  algorithm      :string
+#  password_hash  :string
+#  salt           :string
+#  metadata       :jsonb
+#  reset_required :boolean          default(FALSE), not null
+#  created_at     :datetime         not null
 #
 # Indexes
 #

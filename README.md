@@ -21,6 +21,19 @@ algorithm and deletes the legacy hash** — so the legacy hash is used exactly o
 Supported legacy formats: `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`, `vbulletin`,
 `ipb`, `smf`, `joomla`, `crypt`, and `phpass` (WordPress / phpBB3).
 
+A matched legacy password is only migrated if it **satisfies Discourse's current
+password policy** (length, blocked passwords, …). A correct-but-non-compliant password
+is never stored; instead the member is routed into the reset flow below.
+
+### Set a new password when there's no usable one
+
+Some imported members can't keep their old password — either it couldn't be imported,
+or it no longer meets the password policy. Without help they don't know they need to do
+anything. When such a member tries to sign in, Landfall emails them a set-password link
+and shows a clear message, instead of a bare "incorrect password". This reuses
+Discourse's own reset-email flow (and the "set password" template for passwordless
+accounts), and stops automatically once they've set a password.
+
 ### Log in with the old username
 
 Discourse's username rules and de-duplication often **rename** members during import.
@@ -41,6 +54,7 @@ rather than guessed — the live owner can never be hijacked.
 | `landfall_enabled` | `false` | Master switch. |
 | `landfall_login_with_old_password_enabled` | `true` | Enable old-password login. |
 | `landfall_login_with_old_username_enabled` | `true` | Enable old-username login. |
+| `landfall_force_password_reset_enabled` | `true` | Email a set-password link to imported members with no usable password when they try to sign in. |
 
 ## Import-tooling data contract
 
@@ -52,13 +66,15 @@ legacy hash can never leak through a serializer. Your migration tooling populate
 | Column | Notes |
 | --- | --- |
 | `user_id` | unique |
-| `algorithm` | one of the supported formats above |
-| `password_hash` | the stored legacy hash |
+| `algorithm` | one of the supported formats above (omit for a reset-required marker) |
+| `password_hash` | the stored legacy hash (omit for a reset-required marker) |
 | `salt` | for `vbulletin` / `ipb` (others embed their salt) |
 | `metadata` | JSON; e.g. `{ "username": "..." }` for `smf` |
+| `reset_required` | `true` for members with no importable password — they are routed to set one on login |
 
 Because the algorithm is stored **per user**, you can merge communities coming from
-different forum software into one Discourse site.
+different forum software into one Discourse site. For a member whose password you
+couldn't bring over, write a row with just `reset_required: true` (no algorithm/hash).
 
 `migrated_usernames` (one row per prior username per user): `user_id`, `username`
 (`username_lower` is derived and indexed for fast, exact lookups).

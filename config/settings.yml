@@ -6,3 +6,5 @@ landfall:
     default: true
   landfall_login_with_old_username_enabled:
     default: true
+  landfall_force_password_reset_enabled:
+    default: true

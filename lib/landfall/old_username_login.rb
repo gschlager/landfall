@@ -10,6 +10,7 @@ module Landfall
   # is covered by the Discourse-integration specs.
   module OldUsernameLogin
     def self.maybe_rewrite_login!(params)
+      return unless SiteSetting.landfall_enabled
       return unless SiteSetting.landfall_login_with_old_username_enabled
 
       login = params[:login].to_s

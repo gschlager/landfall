@@ -48,6 +48,9 @@ low-value to mutation-test:
 - `Landfall::SessionControllerExtension#create` (prepend on `SessionController`).
 - `Landfall::OldUsernameLogin` (AR queries → build `candidates` → call `LoginDecision`
   → rewrite `params[:login]`).
+- `Landfall::PasswordPolicy` (validates a throwaway `UserPassword`),
+  `Landfall::LegacyLogin` (classifies a login against the stored record), and
+  `Landfall::ForcedPasswordReset` (sends the set-password email).
 
 Covered by `spec/integration/**`, which `require "rails_helper"` and run inside a
 Discourse checkout (`bin/rspec plugins/landfall/spec/integration`). They exercise the

@@ -1,36 +1,23 @@
 # frozen_string_literal: true
 
-require_relative "legacy_password_verifier"
+require_relative "legacy_login"
 
 module Landfall
   # Prepended onto User. After Discourse's native password check fails, it falls back
-  # to a stored legacy hash; on a match it re-hashes the password to Discourse's
-  # native algorithm and deletes the legacy record so it is used exactly once.
+  # to a stored legacy hash. A matched, policy-compliant password is re-hashed to
+  # Discourse's native algorithm and the legacy record is deleted (used exactly once).
+  #
+  # A matched but non-compliant password is deliberately NOT stored here: persisting a
+  # password that violates the current policy would be a security regression. That case
+  # is handled by SessionController, which routes the user into the password-reset flow.
   module UserConfirmPasswordExtension
     def confirm_password?(password)
       return true if super
-      return false unless SiteSetting.landfall_login_with_old_password_enabled
+      return false unless Landfall::LegacyLogin.classify(self, password) == :compliant
 
-      migrated = landfall_migrated_password
-      return false if migrated.blank?
-
-      matched =
-        LegacyPasswordVerifier.matches?(
-          algorithm: migrated.algorithm,
-          hash: migrated.password_hash,
-          password: password,
-          salt: migrated.salt,
-          metadata: migrated.metadata,
-        )
-      return false unless matched
-
-      # Persist the re-hashed password without validation: the legacy password
-      # predates Discourse's current password policy (e.g. minimum length), and a
-      # valid member must not be locked out of their own account just because their
-      # old password is shorter than the policy now requires.
       self.password = password
-      save!(validate: false)
-      migrated.destroy!
+      save!
+      landfall_migrated_password.destroy!
       true
     end
   end
