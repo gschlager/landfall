@@ -24,8 +24,12 @@ module Landfall
         )
       return false unless matched
 
+      # Persist the re-hashed password without validation: the legacy password
+      # predates Discourse's current password policy (e.g. minimum length), and a
+      # valid member must not be locked out of their own account just because their
+      # old password is shorter than the policy now requires.
       self.password = password
-      save!
+      save!(validate: false)
       migrated.destroy!
       true
     end
