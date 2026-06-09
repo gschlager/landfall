@@ -4,7 +4,7 @@ module Landfall
   # A username a user had before the migration renamed them. Stored server-side only;
   # one row per prior username. `username_lower` is indexed for exact login lookups.
   class OldUsername < ActiveRecord::Base
-    self.table_name = "landfall_old_usernames"
+    self.table_name = "migrated_usernames"
 
     belongs_to :user
 
@@ -23,7 +23,7 @@ end
 
 # == Schema Information
 #
-# Table name: landfall_old_usernames
+# Table name: migrated_usernames
 #
 #  id             :bigint           not null, primary key
 #  user_id        :bigint           not null
@@ -33,6 +33,6 @@ end
 #
 # Indexes
 #
-#  index_landfall_old_usernames_on_user_id         (user_id)
-#  index_landfall_old_usernames_on_username_lower  (username_lower)
+#  index_migrated_usernames_on_user_id         (user_id)
+#  index_migrated_usernames_on_username_lower  (username_lower)
 #

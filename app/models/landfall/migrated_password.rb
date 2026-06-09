@@ -5,7 +5,7 @@ module Landfall
   # Created by the migration tooling; deleted automatically the first time the user
   # logs in with it (after re-hashing to Discourse's native algorithm).
   class MigratedPassword < ActiveRecord::Base
-    self.table_name = "landfall_migrated_passwords"
+    self.table_name = "migrated_passwords"
 
     belongs_to :user
 
@@ -17,7 +17,7 @@ end
 
 # == Schema Information
 #
-# Table name: landfall_migrated_passwords
+# Table name: migrated_passwords
 #
 #  id            :bigint           not null, primary key
 #  user_id       :bigint           not null
@@ -29,5 +29,5 @@ end
 #
 # Indexes
 #
-#  index_landfall_migrated_passwords_on_user_id  (user_id) UNIQUE
+#  index_migrated_passwords_on_user_id  (user_id) UNIQUE
 #

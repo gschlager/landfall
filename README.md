@@ -47,7 +47,7 @@ rather than guessed — the live owner can never be hijacked.
 Landfall stores its data in **plugin-owned tables** (never user custom fields), so a
 legacy hash can never leak through a serializer. Your migration tooling populates them:
 
-`landfall_migrated_passwords` (one row per user):
+`migrated_passwords` (one row per user):
 
 | Column | Notes |
 | --- | --- |
@@ -60,12 +60,12 @@ legacy hash can never leak through a serializer. Your migration tooling populate
 Because the algorithm is stored **per user**, you can merge communities coming from
 different forum software into one Discourse site.
 
-`landfall_old_usernames` (one row per prior username per user): `user_id`, `username`
+`migrated_usernames` (one row per prior username per user): `user_id`, `username`
 (`username_lower` is derived and indexed for fast, exact lookups).
 
 ## Security notes
 
-- Legacy hashes live only in `landfall_migrated_passwords` and are never serialized to
+- Legacy hashes live only in `migrated_passwords` and are never serialized to
   any client.
 - A live username owner is always authenticated first, so old-username login can never
   take over an existing account; ambiguous old usernames are refused.
