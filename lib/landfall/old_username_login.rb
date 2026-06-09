@@ -45,7 +45,7 @@ module Landfall
     end
 
     def self.legacy_match?(user, password)
-      migrated = user.landfall_migrated_password
+      migrated = user.migrated_password
       return false if migrated.blank?
 
       LegacyPasswordVerifier.matches?(

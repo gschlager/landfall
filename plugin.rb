@@ -30,10 +30,8 @@ after_initialize do
   require_relative "lib/landfall/session_controller_extension"
 
   reloadable_patch do
-    User.has_one :landfall_migrated_password,
-                 class_name: "Landfall::MigratedPassword",
-                 dependent: :destroy
-    User.has_many :landfall_old_usernames, class_name: "Landfall::OldUsername", dependent: :destroy
+    User.has_one :migrated_password, class_name: "Landfall::MigratedPassword", dependent: :destroy
+    User.has_many :old_usernames, class_name: "Landfall::OldUsername", dependent: :destroy
 
     User.prepend(Landfall::UserConfirmPasswordExtension)
     SessionController.prepend(Landfall::SessionControllerExtension)

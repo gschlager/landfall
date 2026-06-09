@@ -17,7 +17,7 @@ module Landfall
 
       self.password = password
       save!
-      landfall_migrated_password.destroy!
+      migrated_password.destroy!
       true
     end
   end

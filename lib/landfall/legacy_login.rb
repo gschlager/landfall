@@ -13,7 +13,7 @@ module Landfall
     def self.classify(user, password)
       return :none unless SiteSetting.landfall_enabled
 
-      migrated = user.landfall_migrated_password
+      migrated = user.migrated_password
       return :none if migrated.blank?
 
       if migrated.reset_required?

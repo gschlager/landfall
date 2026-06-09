@@ -21,7 +21,7 @@ module Landfall
 
       begin
         Landfall::OldUsernameLogin.maybe_rewrite_login!(params)
-        payload = landfall_forced_reset_payload
+        payload = forced_reset_payload
       rescue StandardError => e
         Rails.logger.warn("Landfall: login interception skipped (#{e.class}: #{e.message})")
       end
@@ -33,7 +33,7 @@ module Landfall
 
     private
 
-    def landfall_forced_reset_payload
+    def forced_reset_payload
       login = normalized_login_param
       return if login.blank?
 
