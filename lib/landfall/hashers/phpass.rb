@@ -15,7 +15,8 @@ module Landfall
       end
 
       def self.crypt(password, setting)
-        return "*0" unless %w[$P$ $H$].include?(setting[0, 3])
+        prefix = setting[0, 3]
+        return "*0" if prefix != "$P$" && prefix != "$H$"
 
         count_log2 = ITOA64.index(setting[3])
         return "*0" if count_log2.nil? || count_log2 < 7 || count_log2 > 30

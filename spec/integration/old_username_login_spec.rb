@@ -27,7 +27,7 @@ RSpec.describe Landfall::OldUsernameLogin do
     Landfall::MigratedPassword.create!(user: user, algorithm: "md5", password_hash: hash)
   end
 
-  context "simple rename (no live collision)" do
+  context "with a simple rename (no live collision)" do
     it "rewrites the old username to the user's current username" do
       user = Fabricate(:user, username: "foo2")
       add_old_username(user, "foo")
@@ -56,7 +56,7 @@ RSpec.describe Landfall::OldUsernameLogin do
     end
   end
 
-  context "live-username collision (Foo / Foo1 / Foo2)" do
+  context "with a live-username collision (Foo / Foo1 / Foo2)" do
     fab!(:native) { Fabricate(:user, username: "foo", password: "native-password") }
     fab!(:imported) { Fabricate(:user, username: "foo2") }
 

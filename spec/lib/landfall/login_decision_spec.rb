@@ -18,7 +18,12 @@ RSpec.describe Landfall::LoginDecision do
 
   context "when no live user owns the typed username (simple rename)" do
     it "rewrites to the only candidate's current username" do
-      result = decide(live_present: false, live_password_matches: false, candidates: [candidate("foo2", false)])
+      result =
+        decide(
+          live_present: false,
+          live_password_matches: false,
+          candidates: [candidate("foo2", false)],
+        )
       expect(result).to eq(rewrite_to: "foo2")
     end
 
@@ -28,11 +33,18 @@ RSpec.describe Landfall::LoginDecision do
 
     it "bails when several distinct candidates are ambiguous" do
       candidates = [candidate("foo2", false), candidate("foo3", false)]
-      expect(decide(live_present: false, live_password_matches: false, candidates: candidates)).to eq(:bail)
+      expect(
+        decide(live_present: false, live_password_matches: false, candidates: candidates),
+      ).to eq(:bail)
     end
 
     it "ignores legacy_match in this branch (rewrite regardless, super verifies)" do
-      result = decide(live_present: false, live_password_matches: false, candidates: [candidate("foo2", true)])
+      result =
+        decide(
+          live_present: false,
+          live_password_matches: false,
+          candidates: [candidate("foo2", true)],
+        )
       expect(result).to eq(rewrite_to: "foo2")
     end
   end
@@ -40,22 +52,30 @@ RSpec.describe Landfall::LoginDecision do
   context "when a live user owns the typed username (collision)" do
     it "bails so the live owner logs in when their password matches" do
       candidates = [candidate("foo2", true)]
-      expect(decide(live_present: true, live_password_matches: true, candidates: candidates)).to eq(:bail)
+      expect(decide(live_present: true, live_password_matches: true, candidates: candidates)).to eq(
+        :bail,
+      )
     end
 
     it "rewrites to the single imported user whose legacy password matches" do
       candidates = [candidate("foo2", true), candidate("foo3", false)]
-      expect(decide(live_present: true, live_password_matches: false, candidates: candidates)).to eq(rewrite_to: "foo2")
+      expect(
+        decide(live_present: true, live_password_matches: false, candidates: candidates),
+      ).to eq(rewrite_to: "foo2")
     end
 
     it "bails when no imported candidate's legacy password matches" do
       candidates = [candidate("foo2", false), candidate("foo3", false)]
-      expect(decide(live_present: true, live_password_matches: false, candidates: candidates)).to eq(:bail)
+      expect(
+        decide(live_present: true, live_password_matches: false, candidates: candidates),
+      ).to eq(:bail)
     end
 
     it "bails when more than one imported candidate matches (ambiguous)" do
       candidates = [candidate("foo2", true), candidate("foo3", true)]
-      expect(decide(live_present: true, live_password_matches: false, candidates: candidates)).to eq(:bail)
+      expect(
+        decide(live_present: true, live_password_matches: false, candidates: candidates),
+      ).to eq(:bail)
     end
   end
 end

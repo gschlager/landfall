@@ -27,9 +27,7 @@ after_initialize do
     User.has_one :landfall_migrated_password,
                  class_name: "Landfall::MigratedPassword",
                  dependent: :destroy
-    User.has_many :landfall_old_usernames,
-                  class_name: "Landfall::OldUsername",
-                  dependent: :destroy
+    User.has_many :landfall_old_usernames, class_name: "Landfall::OldUsername", dependent: :destroy
 
     User.prepend(Landfall::UserConfirmPasswordExtension)
     SessionController.prepend(Landfall::SessionControllerExtension)

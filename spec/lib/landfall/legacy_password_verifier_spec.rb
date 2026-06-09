@@ -44,11 +44,15 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
   FIXTURES.each do |algorithm, (hash, salt, metadata)|
     context "with #{algorithm}" do
       it "accepts the correct password" do
-        expect(verify(PASSWORD, algorithm: algorithm, hash: hash, salt: salt, metadata: metadata)).to eq(true)
+        expect(
+          verify(PASSWORD, algorithm: algorithm, hash: hash, salt: salt, metadata: metadata),
+        ).to eq(true)
       end
 
       it "rejects a wrong password" do
-        expect(verify("wrong", algorithm: algorithm, hash: hash, salt: salt, metadata: metadata)).to eq(false)
+        expect(
+          verify("wrong", algorithm: algorithm, hash: hash, salt: salt, metadata: metadata),
+        ).to eq(false)
       end
     end
   end
@@ -57,7 +61,9 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
   %w[md5 sha1 sha256 sha512 vbulletin ipb smf].each do |algorithm|
     it "matches #{algorithm} regardless of stored hash case" do
       hash, salt, metadata = FIXTURES.fetch(algorithm)
-      expect(verify(PASSWORD, algorithm: algorithm, hash: hash.upcase, salt: salt, metadata: metadata)).to eq(true)
+      expect(
+        verify(PASSWORD, algorithm: algorithm, hash: hash.upcase, salt: salt, metadata: metadata),
+      ).to eq(true)
     end
   end
 
@@ -69,7 +75,9 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
   describe "salted algorithms require their salt" do
     it "returns false for vbulletin without a salt" do
       hash, = FIXTURES.fetch("vbulletin")
-      expect(verify(PASSWORD, algorithm: "vbulletin", hash: hash, salt: nil, metadata: nil)).to eq(false)
+      expect(verify(PASSWORD, algorithm: "vbulletin", hash: hash, salt: nil, metadata: nil)).to eq(
+        false,
+      )
     end
 
     it "returns false for ipb without a salt" do
@@ -86,29 +94,51 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
   describe "joomla variants" do
     it "verifies a bare md5(password) with no embedded salt" do
       bare = "5f4dcc3b5aa765d61d8327deb882cf99"
-      expect(verify(PASSWORD, algorithm: "joomla", hash: bare, salt: nil, metadata: nil)).to eq(true)
+      expect(verify(PASSWORD, algorithm: "joomla", hash: bare, salt: nil, metadata: nil)).to eq(
+        true,
+      )
     end
 
     it "matches regardless of the stored digest case" do
       hash, = FIXTURES.fetch("joomla")
       digest, salt = hash.split(":", 2)
-      expect(verify(PASSWORD, algorithm: "joomla", hash: "#{digest.upcase}:#{salt}", salt: nil, metadata: nil)).to eq(true)
+      expect(
+        verify(
+          PASSWORD,
+          algorithm: "joomla",
+          hash: "#{digest.upcase}:#{salt}",
+          salt: nil,
+          metadata: nil,
+        ),
+      ).to eq(true)
     end
 
     it "treats only the first colon as the digest separator (salt may contain colons)" do
       salt = "a:b:c"
       digest = Digest::MD5.hexdigest(PASSWORD + salt)
-      expect(verify(PASSWORD, algorithm: "joomla", hash: "#{digest}:#{salt}", salt: nil, metadata: nil)).to eq(true)
+      expect(
+        verify(PASSWORD, algorithm: "joomla", hash: "#{digest}:#{salt}", salt: nil, metadata: nil),
+      ).to eq(true)
     end
   end
 
   describe "phpass / bcrypt rejection of malformed hashes" do
     it "returns false for a phpass hash with the wrong prefix" do
-      expect(verify(PASSWORD, algorithm: "phpass", hash: "$Q$9aaaaaaaapfq1isZeLdu4Un4umlr.W1", salt: nil, metadata: nil)).to eq(false)
+      expect(
+        verify(
+          PASSWORD,
+          algorithm: "phpass",
+          hash: "$Q$9aaaaaaaapfq1isZeLdu4Un4umlr.W1",
+          salt: nil,
+          metadata: nil,
+        ),
+      ).to eq(false)
     end
 
     it "returns false for a malformed bcrypt hash" do
-      expect(verify(PASSWORD, algorithm: "bcrypt", hash: "not-a-bcrypt-hash", salt: nil, metadata: nil)).to eq(false)
+      expect(
+        verify(PASSWORD, algorithm: "bcrypt", hash: "not-a-bcrypt-hash", salt: nil, metadata: nil),
+      ).to eq(false)
     end
 
     it "returns false for crypt with an empty hash" do
@@ -159,7 +189,9 @@ RSpec.describe Landfall::LegacyPasswordVerifier do
       hash, = FIXTURES.fetch("smf")
       # SMF needs metadata["username"]; with metadata defaulted it must not match
       # and must not raise.
-      expect(described_class.matches?(algorithm: "smf", hash: hash, password: PASSWORD)).to eq(false)
+      expect(described_class.matches?(algorithm: "smf", hash: hash, password: PASSWORD)).to eq(
+        false,
+      )
     end
   end
 end
