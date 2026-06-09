@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # name: landfall
-# about: Helps admins migrate communities into Discourse — letting members keep logging in with their old username and password after an import.
+# about: Migration companion for Discourse — smooths importing one or more communities and helps members settle in after the move.
 # meta_topic_id: TODO
 # version: 0.0.1
 # authors: Gerhard Schlager
