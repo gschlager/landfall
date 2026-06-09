@@ -1,12 +1,25 @@
 # Landfall
 
 A migration-companion plugin for [Discourse](https://www.discourse.org). Landfall
-smooths the cutover when you import one or more communities into Discourse — starting
-with letting members keep logging in after the move.
+smooths the cutover when you import one or more communities into Discourse — and helps
+members feel at home once they arrive. The login features below are the first step; see
+[`IDEAS.md`](IDEAS.md) for the broader roadmap.
+
+## At a glance
+
+- **Log in with the old password** — members sign in with the password from their old
+  forum. Landfall verifies it against a stored legacy hash (11 formats supported), then
+  re-hashes it to Discourse's native algorithm and deletes the legacy hash — so the
+  legacy hash is used exactly once.
+- **Automatic set-password email** — members who arrive with no usable password get a
+  set-password link and a clear message the first time they try to sign in, instead of
+  a bare "incorrect password".
+- **Log in with the old username** — members renamed during import can sign in with
+  their previous username. Live-username collisions are resolved by password and never
+  guessed, so an existing account can't be hijacked.
 
 It is a sibling to the MIT [`discourse/markbridge`](https://github.com/discourse/markbridge)
-markup-conversion gem. See [`IDEAS.md`](IDEAS.md) for the broader roadmap and
-[`TESTING.md`](TESTING.md) for the quality standard.
+markup-conversion gem. See [`TESTING.md`](TESTING.md) for the quality standard.
 
 ## Features (v1)
 
