@@ -25,7 +25,6 @@ after_initialize do
   require_relative "lib/landfall/login_decision"
   require_relative "lib/landfall/password_policy"
   require_relative "lib/landfall/legacy_login"
-  require_relative "lib/landfall/forced_password_reset"
   require_relative "lib/landfall/old_username_login"
   require_relative "lib/landfall/user_confirm_password_extension"
   require_relative "lib/landfall/session_controller_extension"

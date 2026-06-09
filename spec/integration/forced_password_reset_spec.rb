@@ -2,22 +2,8 @@
 
 require "rails_helper"
 
-RSpec.describe Landfall::ForcedPasswordReset do
-  fab!(:user)
-
-  it "creates a password-reset email token and enqueues the email" do
-    expect { described_class.call(user) }.to change {
-      user.email_tokens.where(scope: EmailToken.scopes[:password_reset]).count
-    }.by(1)
-
-    expect(
-      Jobs::CriticalUserEmail.jobs.any? { |j| j["args"][0]["type"] == "forgot_password" },
-    ).to eq(true)
-  end
-end
-
 # The user-facing behaviour: a matched-but-non-compliant legacy password must not be
-# stored; instead the login is bounced and the user is emailed a set-password link.
+# stored; instead the login is bounced and Discourse's own reset email is sent.
 RSpec.describe "Landfall forced password reset on login", type: :request do
   fab!(:user)
 

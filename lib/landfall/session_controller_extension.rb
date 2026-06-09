@@ -2,17 +2,20 @@
 
 require_relative "old_username_login"
 require_relative "legacy_login"
-require_relative "forced_password_reset"
 
 module Landfall
   # Prepended onto SessionController. Before the normal local-login flow runs it:
   #   1. rewrites the login param from an old username to the current one, and
-  #   2. intercepts a matched-but-non-compliant legacy password: rather than storing a
-  #      password that violates the current policy, it emails the user a set-password
-  #      link and bounces the login with a distinct reason.
-  # A compliant legacy password is left for User#confirm_password? to migrate during
-  # the normal login. A failure in this interception must never break normal logins.
+  #   2. intercepts members who must set a new password (a matched-but-non-compliant
+  #      legacy password, or no usable imported password): rather than storing anything
+  #      or reimplementing a reset, it asks Discourse to send its own password-reset
+  #      email (SessionController#enqueue_password_reset_for_user) and bounces the login
+  #      with a distinct reason + message.
+  # A compliant legacy password is left for User#confirm_password? to migrate during the
+  # normal login. A failure in this interception must never break normal logins.
   module SessionControllerExtension
+    FORCED_RESET_STATES = %i[non_compliant reset_required].freeze
+
     def create
       payload = nil
 
@@ -30,8 +33,6 @@ module Landfall
 
     private
 
-    FORCED_RESET_STATES = %i[non_compliant reset_required].freeze
-
     def landfall_forced_reset_payload
       login = normalized_login_param
       return if login.blank?
@@ -43,7 +44,13 @@ module Landfall
       status = Landfall::LegacyLogin.classify(user, params[:password].to_s)
       return if FORCED_RESET_STATES.exclude?(status)
 
-      Landfall::ForcedPasswordReset.call(user)
+      # Reuse Discourse's own reset flow (token, rate limit, mailer) verbatim.
+      begin
+        enqueue_password_reset_for_user(user)
+      rescue RateLimiter::LimitExceeded
+        # Already emailed recently; still show the reset message.
+      end
+
       { error: I18n.t("landfall.must_reset_password"), reason: "must_reset_password" }
     end
   end
