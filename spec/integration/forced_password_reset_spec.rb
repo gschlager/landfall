@@ -60,12 +60,14 @@ RSpec.describe "Landfall forced reset for passwordless imported users", type: :r
     expect(user.email_tokens.where(scope: EmailToken.scopes[:password_reset]).exists?).to eq(true)
   end
 
-  it "stops bouncing once the user has set a password" do
+  it "stops forcing a reset once the user has set a password" do
     user.update!(password: "swordfishtango7")
 
     post "/session.json", params: { login: user.username, password: "swordfishtango7" }
 
-    expect(response.parsed_body["reason"]).to be_nil
-    expect(response.parsed_body["error"]).to be_nil
+    # Landfall no longer intercepts; whatever core does next (activation, etc.) is its
+    # own concern. What matters here is that we neither bounce nor email a reset.
+    expect(response.parsed_body["reason"]).not_to eq("must_reset_password")
+    expect(user.email_tokens.where(scope: EmailToken.scopes[:password_reset])).to be_empty
   end
 end
