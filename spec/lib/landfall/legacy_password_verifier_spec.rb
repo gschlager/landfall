@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "spec_helper"
+require_relative "../../spec_helper"
 require "digest"
 require_relative "../../../lib/landfall/legacy_password_verifier"
 
